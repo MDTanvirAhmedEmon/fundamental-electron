@@ -8,6 +8,11 @@ button.addEventListener("click", () => {
   console.log(test);
 });
 
+// received with call back
+// window.api.onFromMain((data) => {
+//   console.log("Received:", data);
+// });
+
 sendMainBtn.addEventListener("click", () => {
     window.api.SendToMain();
 });

@@ -7,6 +7,14 @@ ipcRenderer.on('fromMain', (event, data)=> {
     console.log(data)
 })
 
+// received with call back
+// contextBridge.exposeInMainWorld("api", {
+//   onFromMain: (callback) => {
+//     ipcRenderer.on("fromMain", (event, data) => {
+//       callback(data);
+//     });
+//   }
+// });
 
 // sending data to main process
 contextBridge.exposeInMainWorld('api', {
