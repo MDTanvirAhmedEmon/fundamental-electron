@@ -1,16 +1,266 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Hello World!</title>
 
-  </head>
-  <body>
-    <h1>💖 Hello World!</h1>
+<head>
+  <meta charset="UTF-8" />
+  <title>Hello World!</title>
+
+</head>
+<style>
+  .titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 12px;
+    border-bottom: 0.5px solid #dedcd126;
+    background: #f5f4ed;
+    justify-content: flex-end;
+    -webkit-app-region: drag;
+  }
+
+  .dot-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    -webkit-app-region: no-drag;
+  }
+
+  .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+  }
+
+  .dot.red {
+    background: #E24B4A;
+    cursor: pointer;
+  }
+
+  .dot.yellow {
+    background: #EF9F27;
+    cursor: pointer;
+  }
+
+  .dot.green {
+    background: #639922;
+    cursor: pointer;
+  }
+
+  .titlebar-label {
+    font-size: 14px;
+    color: #3d3d3a;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+
+
+
+
+  /* Container */
+  .app {
+    padding: 16px;
+  }
+
+  /* Header */
+  .project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .project-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+  }
+
+  .tag {
+    background: #dcd8ff;
+    color: #4b3fbf;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+  }
+
+  /* Status */
+  .status {
+    margin-top: 8px;
+    display: inline-block;
+    background: #dff3d8;
+    color: #4e7d3c;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+  }
+
+  /* Timer */
+  .timer {
+    text-align: center;
+    font-size: 42px;
+    margin: 20px 0 6px;
+    font-weight: 600;
+    letter-spacing: 2px;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+  }
+
+  /* Play Button */
+  .play-btn {
+    width: 60px;
+    height: 60px;
+    background: #5b4bdb;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    margin: 16px auto;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  /* Logs */
+  .log-title {
+    font-size: 12px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #555;
+  }
+
+  .log-today-item {
+    display: flex;
+    justify-content: space-between;
+    background: #f3f1ea;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .log-today-item .left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dot-log-purple {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #7b6ef6;
+  }
+
+  .dot-log-blue {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #5c6bc0;
+  }
+
+  .dot-log-green {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4caf50;
+  }
+
+  .dot-log-orange {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e76f51;
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: #ccc;
+    margin: 16px 0;
+  }
+
+  /* Total */
+  .total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+  }
+</style>
+
+<body>
+  <div class="titlebar">
+    <div></div>
+    <div class="titlebar-label">Time Tracker</div>
+    <div class="dot-wrapper">
+      <div id="app-minimize" class="dot green"></div>
+      <div class="dot yellow"></div>
+      <div id="app-close" class="dot red"></div>
+    </div>
+  </div>
+
+
+  <div class="app">
+    <div class="project-header">
+      <div class="project-info">
+        <div class="dot-log-purple"></div>
+        <span>Website Redesign</span>
+      </div>
+      <span class="tag">Design</span>
+    </div>
+
+    <div class="status">Paused</div>
+
+    <div class="timer">00:00:00</div>
+    <div class="subtitle">Click to start tracking</div>
+
+    <div class="play-btn">▶</div>
+
+    <div class="log-title">TODAY'S LOG</div>
+
+    <div class="log-today-item">
+      <div class="left">
+        <span class="dot-log-blue"></span>
+        Brand Strategy
+      </div>
+      <span>1h 42m</span>
+    </div>
+
+    <div class="log-today-item">
+      <div class="left">
+        <span class="dot-log-green"></span>
+        Wireframes
+      </div>
+      <span>0h 58m</span>
+    </div>
+
+    <div class="log-today-item">
+      <div class="left">
+        <span class="dot-log-orange"></span>
+        Client Call
+      </div>
+      <span>0h 30m</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="total">
+      <span>Total today</span>
+      <strong>3h 10m</strong>
+    </div>
+  </div>
+
+  <!-- <h1>💖 Hello World!</h1>
     <p>Welcome to your Electron application.</p>
     <button class="btn">Click</button>
     <button class="sendMainBtn">Send to main</button>
-    <button class="twoWayBtn">Two Way</button>
-    <script type="module" src="/src/renderer.js"></script>
-  </body>
+    <button class="twoWayBtn">Two Way</button> -->
+  <script type="module" src="/src/renderer.js"></script>
+</body>
+
 </html>

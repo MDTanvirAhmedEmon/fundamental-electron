@@ -6,15 +6,18 @@ import started from 'electron-squirrel-startup';
 if (started) {
   app.quit();
 }
-
+let mainWindow;
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
-    width: 800,
-    height: 600,
+    width: 320,
+    height: 550,
+    maxWidth: 320,
+    maxHeight: 550,
+    // transparent: true,
     resizable: false,
     frame: false,
     icon: path.join(app.getAppPath(), 'src', 'tracker_logo.ico'),
@@ -22,9 +25,9 @@ const createWindow = () => {
   });
 
   // send into preload
-  mainWindow.webContents.on('did-finish-load', () => {
-    mainWindow.webContents.send("fromMain", "This is from main process");
-  });
+  // mainWindow.webContents.on('did-finish-load', () => {
+  //   mainWindow.webContents.send("fromMain", "This is from main process");
+  // });
 
   // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
@@ -42,16 +45,25 @@ const createWindow = () => {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   createWindow();
-  
-  // receiving from preload
-  ipcMain.on('fromPreload', (event, data)=> {
-      console.log(data)
-  })
 
-  // receiving from preload two way
-  ipcMain.handle('fromPreloadTwoWay', (event, data)=> {
-      console.log(data)
-      return "Sending back";
+  // receiving from preload
+  // ipcMain.on('fromPreload', (event, data) => {
+  //   console.log(data)
+  // })
+
+  // // receiving from preload two way
+  // ipcMain.handle('fromPreloadTwoWay', (event, data) => {
+  //   console.log(data)
+  //   return "Sending back";
+  // })
+
+  ipcMain.handle('app-minimize', () => {
+    mainWindow.minimize();
+  });
+
+
+  ipcMain.handle('close', () => {
+    app.exit();
   })
 
   // On OS X it's common to re-create a window in the app when the
