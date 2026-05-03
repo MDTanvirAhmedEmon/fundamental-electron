@@ -37,6 +37,9 @@ contextBridge.exposeInMainWorld('apiTwoWay', {
 
     minimizeTheApp: async () => {
         await ipcRenderer.invoke('app-minimize');
+    },
+    toggleSize: async () => {
+        await ipcRenderer.invoke('toggle-size');
     }
 }
 )

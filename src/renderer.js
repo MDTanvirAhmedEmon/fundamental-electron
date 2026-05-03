@@ -4,6 +4,7 @@ import './index.css';
 // const sendMainBtn = document.querySelector(".sendMainBtn");
 // const twoWayBtn = document.querySelector(".twoWayBtn");
 const appClose = document.querySelector("#app-close");
+const restoreDown = document.querySelector("#restore-down");
 const appMinimize = document.querySelector("#app-minimize");
 
 // button.addEventListener("click", () => {
@@ -29,4 +30,9 @@ appClose.addEventListener("click", () => {
 
 appMinimize.addEventListener("click", () => {
     window.apiTwoWay.minimizeTheApp();
+});
+
+restoreDown.addEventListener("click", () => {
+    window.apiTwoWay.toggleSize();
+    document.body.classList.toggle('compact-mode');
 });

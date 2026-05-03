@@ -191,6 +191,14 @@
     justify-content: space-between;
     font-size: 14px;
   }
+
+  .extra-content {
+    display: flex;
+  }
+
+  .compact-mode .extra-content {
+    display: none !important;
+  }
 </style>
 
 <body>
@@ -199,7 +207,7 @@
     <div class="titlebar-label">Time Tracker</div>
     <div class="dot-wrapper">
       <div id="app-minimize" class="dot green"></div>
-      <div class="dot yellow"></div>
+      <div id="restore-down" class="dot yellow"></div>
       <div id="app-close" class="dot red"></div>
     </div>
   </div>
@@ -221,9 +229,9 @@
 
     <div class="play-btn">▶</div>
 
-    <div class="log-title">TODAY'S LOG</div>
+    <div class="log-title extra-content">TODAY'S LOG</div>
 
-    <div class="log-today-item">
+    <div class="log-today-item extra-content">
       <div class="left">
         <span class="dot-log-blue"></span>
         Brand Strategy
@@ -231,7 +239,7 @@
       <span>1h 42m</span>
     </div>
 
-    <div class="log-today-item">
+    <div class="log-today-item extra-content">
       <div class="left">
         <span class="dot-log-green"></span>
         Wireframes
@@ -239,7 +247,7 @@
       <span>0h 58m</span>
     </div>
 
-    <div class="log-today-item">
+    <div class="log-today-item extra-content">
       <div class="left">
         <span class="dot-log-orange"></span>
         Client Call
@@ -247,9 +255,9 @@
       <span>0h 30m</span>
     </div>
 
-    <div class="divider"></div>
+    <div class="divider extra-content"></div>
 
-    <div class="total">
+    <div class="total extra-content">
       <span>Total today</span>
       <strong>3h 10m</strong>
     </div>

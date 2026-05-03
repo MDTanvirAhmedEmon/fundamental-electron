@@ -66,6 +66,22 @@ app.whenReady().then(() => {
     app.exit();
   })
 
+let isCompact = false;
+
+ipcMain.handle('toggle-size', () => {
+  if (!mainWindow) return;
+
+  const [x, y] = mainWindow.getPosition();
+
+  if (!isCompact) {
+    mainWindow.setBounds({ x, y, width: 320, height: 330 });
+    isCompact = true;
+  } else {
+    mainWindow.setBounds({ x, y, width: 320, height: 550 });
+    isCompact = false;
+  }
+});
+
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   app.on('activate', () => {
