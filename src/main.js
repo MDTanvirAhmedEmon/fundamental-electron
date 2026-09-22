@@ -1,6 +1,6 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
-import path from 'node:path';
-import started from 'electron-squirrel-startup';
+import { app, BrowserWindow, dialog, ipcMain, Menu } from "electron";
+import path from "node:path";
+import started from "electron-squirrel-startup";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -11,7 +11,7 @@ const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, "preload.js"),
     },
     width: 320,
     height: 550,
@@ -19,8 +19,8 @@ const createWindow = () => {
     maxHeight: 550,
     // transparent: true,
     resizable: false,
-    frame: false,
-    icon: path.join(app.getAppPath(), 'src', 'tracker_logo.ico'),
+    // frame: false,
+    icon: path.join(app.getAppPath(), "src", "tracker_logo.ico"),
     // icon: "/src/tracker_logo.ico",
   });
 
@@ -33,7 +33,9 @@ const createWindow = () => {
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
-    mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
+    mainWindow.loadFile(
+      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
+    );
   }
 
   // Open the DevTools.
@@ -57,34 +59,41 @@ app.whenReady().then(() => {
   //   return "Sending back";
   // })
 
-  ipcMain.handle('app-minimize', () => {
+  ipcMain.handle("app-minimize", () => {
     mainWindow.minimize();
   });
 
-
-  ipcMain.handle('close', () => {
+  ipcMain.handle("close", () => {
     app.exit();
+  });
+
+  let isCompact = false;
+
+  ipcMain.handle("toggle-size", () => {
+    if (!mainWindow) return;
+
+    const [x, y] = mainWindow.getPosition();
+
+    if (!isCompact) {
+      mainWindow.setBounds({ x, y, width: 320, height: 330 });
+      isCompact = true;
+    } else {
+      mainWindow.setBounds({ x, y, width: 320, height: 550 });
+      isCompact = false;
+    }
+  });
+
+  ipcMain.handle("new-window", () => {
+    const childWindow = new BrowserWindow({
+      parent: mainWindow,
+      modal: true,
+    });
+    childWindow.loadURL('https://google.com');
   })
-
-let isCompact = false;
-
-ipcMain.handle('toggle-size', () => {
-  if (!mainWindow) return;
-
-  const [x, y] = mainWindow.getPosition();
-
-  if (!isCompact) {
-    mainWindow.setBounds({ x, y, width: 320, height: 330 });
-    isCompact = true;
-  } else {
-    mainWindow.setBounds({ x, y, width: 320, height: 550 });
-    isCompact = false;
-  }
-});
 
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  app.on('activate', () => {
+  app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
@@ -94,11 +103,45 @@ ipcMain.handle('toggle-size', () => {
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
     app.quit();
   }
 });
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+
+const menuTemplate = [
+  {
+    label: "File",
+    submenu: [
+      {
+        label: "Open",
+        click: async () => {
+          console.log("Clicked")
+          const data = await dialog.showOpenDialog();
+          console.log(data)
+        }
+      },
+      {
+        label: "Open New",
+      },
+    ],
+  },
+  {
+    label: "Insert",
+  },
+  {
+    label: "Edit",
+  },
+  {
+    label: "New File",
+  },
+  {
+    label: "Save",
+  },
+];
+
+const appMenu = Menu.buildFromTemplate(menuTemplate);
+Menu.setApplicationMenu(appMenu);
