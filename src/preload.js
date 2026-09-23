@@ -41,7 +41,27 @@ contextBridge.exposeInMainWorld("apiTwoWay", {
   toggleSize: async () => {
     await ipcRenderer.invoke("toggle-size");
   },
-  newWindowOpen: async () => {
-    await ipcRenderer.invoke("new-window")
-  }
+  // newWindowOpen: async () => {
+  //   await ipcRenderer.invoke("new-window")
+  // }
 });
+
+contextBridge.exposeInMainWorld(
+  "electronAPI",
+  {
+    startTracking: () =>
+      ipcRenderer.invoke(
+        "start-tracking"
+      ),
+
+    stopTracking: () =>
+      ipcRenderer.invoke(
+        "stop-tracking"
+      ),
+
+    takeScreenshot: () =>
+      ipcRenderer.invoke(
+        "take-screenshot"
+      ),
+  }
+);

@@ -1,6 +1,7 @@
 import { app, BrowserWindow, dialog, ipcMain, Menu } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
+import { captureScreenshot } from "./utils/helpers";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -19,7 +20,7 @@ const createWindow = () => {
     maxHeight: 550,
     // transparent: true,
     resizable: false,
-    // frame: false,
+    frame: false,
     icon: path.join(app.getAppPath(), "src", "tracker_logo.ico"),
     // icon: "/src/tracker_logo.ico",
   });
@@ -83,13 +84,101 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle("new-window", () => {
-    const childWindow = new BrowserWindow({
-      parent: mainWindow,
-      modal: true,
-    });
-    childWindow.loadURL('https://google.com');
-  })
+  // ipcMain.handle("new-window", () => {
+  //   const childWindow = new BrowserWindow({
+  //     parent: mainWindow,
+  //     modal: true,
+  //   });
+  //   childWindow.loadURL("https://google.com");
+  // });
+
+
+
+
+  // screenshots
+  ipcMain.handle("take-screenshot", async () => {
+    return await captureScreenshot();
+  });
+
+  // start taking screenshots
+  let tracking = false;
+  let trackingInterval = null;
+  let trackingStartTime = null;
+  let screenshots = [];
+
+  ipcMain.handle("start-tracking", async () => {
+    if (tracking) {
+      return {
+        success: false,
+        message: "Tracking is already running",
+      };
+    }
+
+    tracking = true;
+    trackingStartTime = new Date();
+    screenshots = [];
+
+    console.log("=================================");
+    console.log("TRACKING STARTED");
+    console.log("START TIME:", trackingStartTime);
+    console.log("=================================");
+
+    trackingInterval = setInterval(async () => {
+      try {
+        const screenshot = await captureScreenshot();
+        screenshots.push(screenshot);
+        console.log("Screenshot count:", screenshots.length);
+      } catch (error) {
+        console.error("Screenshot failed:", error);
+      }
+    }, 60 * 1000);
+
+    return {
+      success: true,
+      startedAt: trackingStartTime.toISOString(),
+    };
+  });
+
+  // stop taking screenshots
+  ipcMain.handle("stop-tracking", async () => {
+    if (!tracking) {
+      return {
+        success: false,
+        message: "Tracking is not running",
+      };
+    }
+
+    // Stop the repeating timer
+    clearInterval(trackingInterval);
+    trackingInterval = null;
+    tracking = false;
+
+    // Get stop time
+    const trackingEndTime = new Date();
+    // Calculate duration
+    const durationMs = trackingEndTime.getTime() - trackingStartTime.getTime();
+    const durationSeconds = Math.floor(durationMs / 1000);
+    const durationMinutes = Math.floor(durationSeconds / 60);
+
+    console.log("=================================");
+    console.log("TRACKING STOPPED");
+    console.log("START:", trackingStartTime);
+    console.log("END:", trackingEndTime);
+    console.log("DURATION:", durationMinutes, "minutes");
+    console.log("SCREENSHOTS:", screenshots.length);
+    console.log("=================================");
+
+    return {
+      success: true,
+      startedAt: trackingStartTime.toISOString(),
+      stoppedAt: trackingEndTime.toISOString(),
+      durationSeconds,
+      durationMinutes,
+      screenshots,
+    };
+  });
+
+
 
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
@@ -112,36 +201,36 @@ app.on("window-all-closed", () => {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
 
-const menuTemplate = [
-  {
-    label: "File",
-    submenu: [
-      {
-        label: "Open",
-        click: async () => {
-          console.log("Clicked")
-          const data = await dialog.showOpenDialog();
-          console.log(data)
-        }
-      },
-      {
-        label: "Open New",
-      },
-    ],
-  },
-  {
-    label: "Insert",
-  },
-  {
-    label: "Edit",
-  },
-  {
-    label: "New File",
-  },
-  {
-    label: "Save",
-  },
-];
+// const menuTemplate = [
+//   {
+//     label: "File",
+//     submenu: [
+//       {
+//         label: "Open",
+//         click: async () => {
+//           console.log("Clicked");
+//           const data = await dialog.showOpenDialog();
+//           console.log(data);
+//         },
+//       },
+//       {
+//         label: "Open New",
+//       },
+//     ],
+//   },
+//   {
+//     label: "Insert",
+//   },
+//   {
+//     label: "Edit",
+//   },
+//   {
+//     label: "New File",
+//   },
+//   {
+//     label: "Save",
+//   },
+// ];
 
-const appMenu = Menu.buildFromTemplate(menuTemplate);
-Menu.setApplicationMenu(appMenu);
+// const appMenu = Menu.buildFromTemplate(menuTemplate);
+// Menu.setApplicationMenu(appMenu);
