@@ -1,4 +1,5 @@
-import './index.css';
+import "./index.css";
+import { formatTime } from "./utils/RendererHelpers";
 
 // const button = document.querySelector(".btn");
 // const sendMainBtn = document.querySelector(".sendMainBtn");
@@ -26,16 +27,16 @@ const appMinimize = document.querySelector("#app-minimize");
 // });
 
 appClose.addEventListener("click", () => {
-    window.apiTwoWay.closeTheApp();
+  window.apiTwoWay.closeTheApp();
 });
 
 appMinimize.addEventListener("click", () => {
-    window.apiTwoWay.minimizeTheApp();
+  window.apiTwoWay.minimizeTheApp();
 });
 
 restoreDown.addEventListener("click", () => {
-    window.apiTwoWay.toggleSize();
-    document.body.classList.toggle('compact-mode');
+  window.apiTwoWay.toggleSize();
+  document.body.classList.toggle("compact-mode");
 });
 
 // openWindow.addEventListener("click", ()=> {
@@ -43,59 +44,68 @@ restoreDown.addEventListener("click", () => {
 // });
 
 // Screenshots
-const trackingButton =
-  document.querySelector("#trackingButton");
-
-const trackingStatus =
-  document.querySelector("#trackingStatus");
+const trackingButton = document.querySelector("#trackingButton");
+const trackingStatus = document.querySelector("#trackingStatus");
+const timerElement = document.querySelector("#timer");
 
 let isTracking = false;
 
-trackingButton.addEventListener(
-  "click",
-  async () => {
+// timer for Ui
+let timerInterval = null;
+let timerStartTime = null;
 
-    if (!isTracking) {
+function startTimer() {
+  timerStartTime = Date.now();
 
-      // START
-      const result =
-        await window.electronAPI.startTracking();
+  timerInterval = setInterval(() => {
+    const elapsedMs =
+      Date.now() - timerStartTime;
 
-      console.log(
-        "START RESULT:",
-        result
-      );
+    const elapsedSeconds =
+      Math.floor(elapsedMs / 1000);
 
-      if (result.success) {
-        isTracking = true;
+    timerElement.textContent =
+      formatTime(elapsedSeconds);
+  }, 1000);
+}
 
-        // Change ▶ to ⏸
-        trackingButton.textContent = "⏸";
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerStartTime = null;
+}
 
-        trackingStatus.textContent =
-          "Tracking...";
-      }
+trackingButton.addEventListener("click", async () => {
+  if (!isTracking) {
+    // START
+    const result = await window.electronAPI.startTracking();
 
-    } else {
+    console.log("START RESULT:", result);
 
-      // STOP
-      const result =
-        await window.electronAPI.stopTracking();
+    if (result.success) {
+      isTracking = true;
 
-      console.log(
-        "STOP RESULT:",
-        result
-      );
+      // Change ▶ to ⏸
+      trackingButton.textContent = "⏸";
+      trackingButton.classList.add("tracking");
+      trackingStatus.textContent = "Tracking...";
+      startTimer();
+    }
+  } else {
+    // STOP
+    const result = await window.electronAPI.stopTracking();
 
-      if (result.success) {
-        isTracking = false;
+    console.log("STOP RESULT:", result);
 
-        // Change ⏸ back to ▶
-        trackingButton.textContent = "▶";
+    if (result.success) {
+      isTracking = false;
 
-        trackingStatus.textContent =
-          `Stopped — ${result.durationMinutes} minutes, ${result.screenshots.length} screenshots`;
-      }
+      // Change ⏸ back to ▶
+      trackingButton.textContent = "▶";
+      trackingButton.classList.remove("tracking");
+
+      trackingStatus.textContent = `Stopped — ${result.durationMinutes} minutes, ${result.screenshots.length} screenshots`;
+      stopTimer();
     }
   }
-);
+});

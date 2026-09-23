@@ -15,9 +15,9 @@ const createWindow = () => {
       preload: path.join(__dirname, "preload.js"),
     },
     width: 320,
-    height: 550,
+    height: 540,
     maxWidth: 320,
-    maxHeight: 550,
+    maxHeight: 540,
     // transparent: true,
     resizable: false,
     frame: false,
@@ -79,7 +79,7 @@ app.whenReady().then(() => {
       mainWindow.setBounds({ x, y, width: 320, height: 330 });
       isCompact = true;
     } else {
-      mainWindow.setBounds({ x, y, width: 320, height: 550 });
+      mainWindow.setBounds({ x, y, width: 320, height: 540 });
       isCompact = false;
     }
   });

@@ -39,3 +39,5 @@ export async function captureScreenshot() {
     capturedAt: capturedAt.toISOString(),
   };
 }
+
+
