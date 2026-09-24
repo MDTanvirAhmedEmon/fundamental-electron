@@ -165,6 +165,7 @@ app.whenReady().then(() => {
     console.log("START:", trackingStartTime);
     console.log("END:", trackingEndTime);
     console.log("DURATION:", durationMinutes, "minutes");
+    console.log("durationSeconds:", durationSeconds, "durationSeconds");
     console.log("SCREENSHOTS:", screenshots.length);
     console.log("=================================");
 

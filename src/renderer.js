@@ -46,6 +46,7 @@ restoreDown.addEventListener("click", () => {
 // Screenshots
 const trackingButton = document.querySelector("#trackingButton");
 const trackingStatus = document.querySelector("#trackingStatus");
+const subtitle = document.querySelector("#subtitle");
 const timerElement = document.querySelector("#timer");
 
 let isTracking = false;
@@ -89,6 +90,7 @@ trackingButton.addEventListener("click", async () => {
       trackingButton.textContent = "⏸";
       trackingButton.classList.add("tracking");
       trackingStatus.textContent = "Tracking...";
+      subtitle.textContent = "Click to stop tracking";
       startTimer();
     }
   } else {
@@ -103,7 +105,7 @@ trackingButton.addEventListener("click", async () => {
       // Change ⏸ back to ▶
       trackingButton.textContent = "▶";
       trackingButton.classList.remove("tracking");
-
+      subtitle.textContent = "Click to start tracking";
       trackingStatus.textContent = `Stopped — ${result.durationMinutes} minutes, ${result.screenshots.length} screenshots`;
       stopTimer();
     }
