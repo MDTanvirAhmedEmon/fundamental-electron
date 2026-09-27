@@ -111,3 +111,10 @@ trackingButton.addEventListener("click", async () => {
     }
   }
 });
+
+// setInterval(async () => {
+//   const activeWindow = await window.electronAPI.getActiveWindow();
+
+//   console.log("ACTIVE WINDOW FROM RENDERER:");
+//   console.log(activeWindow);
+// }, 10000);

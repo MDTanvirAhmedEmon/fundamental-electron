@@ -63,5 +63,7 @@ contextBridge.exposeInMainWorld(
       ipcRenderer.invoke(
         "take-screenshot"
       ),
+      
+    // getActiveWindow: () => ipcRenderer.invoke("get-active-window"),
   }
 );
