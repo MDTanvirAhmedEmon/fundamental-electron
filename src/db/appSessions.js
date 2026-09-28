@@ -5,6 +5,7 @@ const createAppSessionsTable = db.prepare(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     app TEXT NOT NULL,
     title TEXT,
+    url TEXT,
     started_at TEXT NOT NULL,
     stopped_at TEXT NOT NULL,
     duration_seconds INTEGER NOT NULL,
@@ -17,6 +18,7 @@ createAppSessionsTable.run();
 export function saveAppSession({
   app,
   title,
+  url,
   startedAt,
   stoppedAt,
   durationSeconds,
@@ -28,16 +30,18 @@ export function saveAppSession({
       INSERT INTO app_sessions (
         app,
         title,
+        url,
         started_at,
         stopped_at,
         duration_seconds,
         created_at
       )
-      VALUES (?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `)
     .run(
       app,
       title,
+      url,
       startedAt,
       stoppedAt,
       durationSeconds,
@@ -48,6 +52,7 @@ export function saveAppSession({
     id: result.lastInsertRowid,
     app,
     title,
+    url,
     startedAt,
     stoppedAt,
     durationSeconds,

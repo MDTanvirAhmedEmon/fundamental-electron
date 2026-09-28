@@ -127,13 +127,14 @@ app.whenReady().then(() => {
 
       const appName = window.owner?.name || "Unknown";
       const title = window.title || "";
-
+      const url = window.url || null;
       // First active application
       if (!currentApp) {
         currentApp = appName;
         currentSession = {
           app: appName,
           title,
+          url,
           startedAt: new Date(),
         };
         // console.log("🟢 SESSION STARTED");
@@ -141,9 +142,21 @@ app.whenReady().then(() => {
         return;
       }
 
-      // Same application
-      if (currentApp === appName) {
-        console.log("SAME APP:", appName);
+      // Same application + same website
+      const sameApp =
+        currentSession.app === appName;
+
+      const sameUrl =
+        currentSession.url === url;
+
+      // Same application + same website
+      if (sameApp && sameUrl) {
+        console.log(
+          "➡️ CONTINUING SESSION:",
+          appName,
+          url
+        );
+
         return;
       }
 
@@ -160,6 +173,7 @@ app.whenReady().then(() => {
       const savedSession = saveAppSession({
         app: currentSession.app,
         title: currentSession.title,
+        url: currentSession.url,
         startedAt: currentSession.startedAt.toISOString(),
         stoppedAt: stoppedAt.toISOString(),
         durationSeconds: currentSession.durationSeconds,
@@ -173,6 +187,7 @@ app.whenReady().then(() => {
       currentSession = {
         app: appName,
         title,
+        url,
         startedAt: stoppedAt,
       };
 
