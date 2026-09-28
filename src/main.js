@@ -2,7 +2,12 @@ import { app, BrowserWindow, dialog, ipcMain, Menu } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
 import { captureScreenshot } from "./utils/helpers";
-import { extractWebsiteFromTitle, getCurrentActiveWindow, isBrowser } from "./utils/activeWindow";
+import {
+  extractWebsiteFromTitle,
+  getCurrentActiveWindow,
+  getDomain,
+  isBrowser,
+} from "./utils/activeWindow";
 import { saveAppSession } from "./db/appSessions";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -99,6 +104,83 @@ app.whenReady().then(() => {
     return await captureScreenshot();
   });
 
+  // app url tracking
+  let activeWindowInterval = null;
+  let currentApp = null;
+  let currentSession = null;
+
+  function startActiveWindowTracking() {
+    activeWindowInterval = setInterval(async () => {
+      const window = await getCurrentActiveWindow();
+      if (!window) {
+        return;
+      }
+
+      console.log("window", window)
+
+      // console.log("=================================");
+      // console.log("APPLICATION:", window.owner?.name);
+      // console.log("TITLE:", window.title);
+      // console.log("IS BROWSER:", browser);
+      // console.log("WEBSITE:", website);
+      // console.log("=================================");
+
+      const appName = window.owner?.name || "Unknown";
+      const title = window.title || "";
+
+      // First active application
+      if (!currentApp) {
+        currentApp = appName;
+        currentSession = {
+          app: appName,
+          title,
+          startedAt: new Date(),
+        };
+        // console.log("🟢 SESSION STARTED");
+        // console.log(currentSession);
+        return;
+      }
+
+      // Same application
+      if (currentApp === appName) {
+        console.log("SAME APP:", appName);
+        return;
+      }
+
+      // Different application
+      // console.log("🔴 APP CHANGED");
+      // console.log("Previous:", currentApp);
+      // console.log("New:", appName);
+      const stoppedAt = new Date();
+      currentSession.stoppedAt = stoppedAt;
+      currentSession.durationSeconds = Math.floor(
+        (stoppedAt - currentSession.startedAt) / 1000,
+      );
+
+      const savedSession = saveAppSession({
+        app: currentSession.app,
+        title: currentSession.title,
+        startedAt: currentSession.startedAt.toISOString(),
+        stoppedAt: stoppedAt.toISOString(),
+        durationSeconds: currentSession.durationSeconds,
+      });
+
+      // console.log("🔴 SESSION COMPLETED");
+      // console.log("Saved in Data based=== ", savedSession);
+
+      // Start new session
+      currentApp = appName;
+      currentSession = {
+        app: appName,
+        title,
+        startedAt: stoppedAt,
+      };
+
+      // console.log("🟢 NEW SESSION STARTED");
+      // console.log(currentSession);
+    }, 5000);
+  }
+
   // start taking screenshots
   let tracking = false;
   let trackingInterval = null;
@@ -116,6 +198,8 @@ app.whenReady().then(() => {
     tracking = true;
     trackingStartTime = new Date();
     screenshots = [];
+
+    startActiveWindowTracking();
 
     console.log("=================================");
     console.log("TRACKING STARTED");
@@ -150,6 +234,12 @@ app.whenReady().then(() => {
     // Stop the repeating timer
     clearInterval(trackingInterval);
     trackingInterval = null;
+
+    if (activeWindowInterval) {
+      clearInterval(activeWindowInterval);
+      activeWindowInterval = null;
+    }
+
     tracking = false;
 
     // Get stop time
@@ -177,90 +267,6 @@ app.whenReady().then(() => {
       screenshots,
     };
   });
-
-  let activeWindowInterval = null;
-  let currentApp = null;
-  let currentSession = null;
-
-  function startActiveWindowTracking() {
-    activeWindowInterval = setInterval(async () => {
-      const window = await getCurrentActiveWindow();
-      if (!window) {
-        return;
-      }
-      console.log("window ", window)
-      const browser = isBrowser(window);
-
-      let website = null;
-
-      if (browser) {
-        website = extractWebsiteFromTitle(window.title);
-      }
-
-      console.log("=================================");
-      console.log("APPLICATION:", window.owner?.name);
-      console.log("TITLE:", window.title);
-      console.log("IS BROWSER:", browser);
-      console.log("WEBSITE:", website);
-      console.log("=================================");
-
-      const appName = window.owner?.name || "Unknown";
-      const title = window.title || "";
-
-      // First active application
-      if (!currentApp) {
-        currentApp = appName;
-        currentSession = {
-          app: appName,
-          title,
-          startedAt: new Date(),
-        };
-        console.log("🟢 SESSION STARTED");
-        console.log(currentSession);
-        return;
-      }
-
-      // Same application
-      if (currentApp === appName) {
-        console.log("SAME APP:", appName);
-        return;
-      }
-
-      // Different application
-      console.log("🔴 APP CHANGED");
-      console.log("Previous:", currentApp);
-      console.log("New:", appName);
-      const stoppedAt = new Date();
-      currentSession.stoppedAt = stoppedAt;
-      currentSession.durationSeconds = Math.floor(
-        (stoppedAt - currentSession.startedAt) / 1000,
-      );
-
-      const savedSession = saveAppSession({
-        app: currentSession.app,
-        title: currentSession.title,
-        startedAt: currentSession.startedAt.toISOString(),
-        stoppedAt: stoppedAt.toISOString(),
-        durationSeconds: currentSession.durationSeconds,
-      });
-
-      console.log("🔴 SESSION COMPLETED");
-      console.log("Saved in Data based=== ", savedSession);
-
-      // Start new session
-      currentApp = appName;
-      currentSession = {
-        app: appName,
-        title,
-        startedAt: stoppedAt,
-      };
-
-      console.log("🟢 NEW SESSION STARTED");
-      console.log(currentSession);
-    }, 5000);
-  }
-
-  startActiveWindowTracking();
 
   // ipcMain.handle("get-active-window", async () => {
   //   const window = await getCurrentActiveWindow();
