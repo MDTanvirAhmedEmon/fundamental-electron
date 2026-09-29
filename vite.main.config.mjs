@@ -4,7 +4,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   build: {
     rollupOptions: {
-      external: ["get-windows", "better-sqlite3"],
+      external: ["get-windows", "better-sqlite3", "uiohook-napi"],
     },
   },
 });

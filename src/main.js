@@ -3,12 +3,12 @@ import path from "node:path";
 import started from "electron-squirrel-startup";
 import { captureScreenshot } from "./utils/helpers";
 import {
-  extractWebsiteFromTitle,
   getCurrentActiveWindow,
   getDomain,
   isBrowser,
 } from "./utils/activeWindow";
 import { saveAppSession } from "./db/appSessions";
+import { InputTest } from "./utils/input-test";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -202,6 +202,8 @@ app.whenReady().then(() => {
   let trackingStartTime = null;
   let screenshots = [];
 
+  const trackerInput = new InputTest();
+
   ipcMain.handle("start-tracking", async () => {
     if (tracking) {
       return {
@@ -215,7 +217,7 @@ app.whenReady().then(() => {
     screenshots = [];
 
     startActiveWindowTracking();
-
+    trackerInput.start();
     console.log("=================================");
     console.log("TRACKING STARTED");
     console.log("START TIME:", trackingStartTime);
@@ -254,7 +256,7 @@ app.whenReady().then(() => {
       clearInterval(activeWindowInterval);
       activeWindowInterval = null;
     }
-
+    trackerInput.stop();
     tracking = false;
 
     // Get stop time

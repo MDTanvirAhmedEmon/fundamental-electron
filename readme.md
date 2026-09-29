@@ -1,0 +1,1 @@
+npx electron-rebuild -f -w uiohook-napi
