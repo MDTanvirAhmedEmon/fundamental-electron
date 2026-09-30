@@ -2,31 +2,22 @@ import { uIOhook } from "uiohook-napi";
 
 const BIT_MOUSE = 1;
 const BIT_KEYBOARD = 2;
-
 const MAX_WINDOW_SECONDS = 60 * 60;
-
 const MOUSEMOVE_THROTTLE_MS = 500;
 
 export class InputTracker {
   constructor() {
     this.handlersBound = false;
-
     this.activityBits = new Uint8Array(
       MAX_WINDOW_SECONDS
     );
-
     this.keysDown = new Set();
-
     this.keypressCount = 0;
     this.mouseClickCount = 0;
     this.mouseMoveCount = 0;
-
     this.windowStartedAt = Date.now();
-
     this.running = false;
-
     this.lastMouseMoveTs = 0;
-
     this.setupListeners();
   }
 
@@ -37,6 +28,11 @@ export class InputTracker {
 
     if (i >= 0 && i < MAX_WINDOW_SECONDS) {
       this.activityBits[i] |= bit;
+      // this.activityBits[i] =
+      //   this.activityBits[i] | bit;
+      // becomes:
+      // this.activityBits[7] =
+      // 0 | 1;
     }
   }
 
@@ -135,11 +131,7 @@ export class InputTracker {
     let totalMouseSeconds = 0;
     let totalKeyboardSeconds = 0;
 
-    for (
-      let i = 0;
-      i < windowSeconds;
-      i++
-    ) {
+    for ( let i = 0; i < windowSeconds; i++ ) {
       const bit = this.activityBits[i];
 
       if (bit !== 0) {

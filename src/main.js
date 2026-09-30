@@ -8,7 +8,8 @@ import {
   isBrowser,
 } from "./utils/activeWindow";
 import { saveAppSession } from "./db/appSessions";
-import { InputTest } from "./utils/input-test";
+import { InputTracker } from "./utils/input-tracker";
+import { saveActivitySession } from "./db/activity";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -116,7 +117,7 @@ app.whenReady().then(() => {
         return;
       }
 
-      console.log("window", window)
+      console.log("window", window);
 
       // console.log("=================================");
       // console.log("APPLICATION:", window.owner?.name);
@@ -143,19 +144,13 @@ app.whenReady().then(() => {
       }
 
       // Same application + same website
-      const sameApp =
-        currentSession.app === appName;
+      const sameApp = currentSession.app === appName;
 
-      const sameUrl =
-        currentSession.url === url;
+      const sameUrl = currentSession.url === url;
 
       // Same application + same website
       if (sameApp && sameUrl) {
-        console.log(
-          "➡️ CONTINUING SESSION:",
-          appName,
-          url
-        );
+        console.log("➡️ CONTINUING SESSION:", appName, url);
 
         return;
       }
@@ -202,7 +197,7 @@ app.whenReady().then(() => {
   let trackingStartTime = null;
   let screenshots = [];
 
-  const trackerInput = new InputTest();
+  const trackerInput = new InputTracker();
 
   ipcMain.handle("start-tracking", async () => {
     if (tracking) {
@@ -256,16 +251,29 @@ app.whenReady().then(() => {
       clearInterval(activeWindowInterval);
       activeWindowInterval = null;
     }
-    trackerInput.stop();
-    tracking = false;
-
-    // Get stop time
+    const activity = trackerInput.getActivity();
     const trackingEndTime = new Date();
-    // Calculate duration
     const durationMs = trackingEndTime.getTime() - trackingStartTime.getTime();
     const durationSeconds = Math.floor(durationMs / 1000);
     const durationMinutes = Math.floor(durationSeconds / 60);
 
+    const activityId = saveActivitySession({
+      startedAt: trackingStartTime.toISOString(),
+      stoppedAt: trackingEndTime.toISOString(),
+      durationSeconds,
+      score: activity.snapshot.score,
+      mouseActivity: activity.snapshot.mouse_activity,
+      keyboardActivity: activity.snapshot.keyboard_activity,
+      mouseMoves: activity.input.mouse_moves,
+      mouseClicks: activity.input.mouse_clicks,
+      keypresses: activity.input.keypresses,
+    });
+
+    trackerInput.stop();
+    tracking = false;
+
+    // Get stop time
+    // Calculate duration
     console.log("=================================");
     console.log("TRACKING STOPPED");
     console.log("START:", trackingStartTime);
